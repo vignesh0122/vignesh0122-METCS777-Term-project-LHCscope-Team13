@@ -56,10 +56,10 @@ df = df.na.fill(0.0)
 df = df.na.replace(-999.0, None).na.drop()
 df = df.na.fill(df.agg(*[F.mean(c).alias(c) for c in df.columns]).first().asDict())
 
-print(f"✅ Dataset loaded: {df.count()} rows, {len(df.columns)} columns")
+print(f"Dataset loaded: {df.count()} rows, {len(df.columns)} columns")
 
 # Add physics-inspired features
-print("🔬 Adding physics features...")
+print("Adding physics features...")
 step_start = time.time()
 
 # Physics feature engineering
@@ -76,7 +76,7 @@ scaler = StandardScaler(inputCol="features", outputCol="scaledFeatures", withStd
 
 # Split data
 train_df, test_df = df.randomSplit([0.8, 0.2], seed=42)
-print(f"📊 Train set: {train_df.count()} rows, Test set: {test_df.count()} rows")
+print(f"Train set: {train_df.count()} rows, Test set: {test_df.count()} rows")
 
 # Create preprocessing pipeline
 pipeline = Pipeline(stages=[assembler, scaler])
@@ -96,7 +96,7 @@ print("\n=== Model Training Phase ===")
 # 1. VIGNESH MODELS
 # =============================================================================
 
-print("\n🏆 VIGNESH SWAMINATHAN MODELS")
+print("\nVIGNESH SWAMINATHAN MODELS")
 
 # Model 1: GBT Baseline
 print("Training GBT Baseline Model...")
@@ -248,7 +248,7 @@ print(".4f")
 print(".4f")
 
 # Save comprehensive results to S3
-print("\n💾 Saving comprehensive results to S3...")
+print("\nSaving comprehensive results to S3...")
 results_df.write.mode("overwrite").csv("s3://colliderscope/results/week2_results_summary.csv", header=True)
 print("Results saved to: s3://colliderscope/results/week2_results_summary.csv")
 
