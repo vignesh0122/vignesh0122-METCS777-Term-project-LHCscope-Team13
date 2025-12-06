@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:23d90906a541775391b4d679f25c795bb130aa5018287221707857f257ef5b56
-size 183
+Model,AUC
+GBT Baseline,0.789318881
+Random Forest,0.808267038
+Neural Network,0.827855394
+Stacking Ensemble,0.830026428
+GBT Physics Loss,0.794451075
+GBT Bayesian Opt,0.815474217
