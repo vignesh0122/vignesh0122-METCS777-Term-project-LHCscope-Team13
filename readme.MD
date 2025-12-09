@@ -1,85 +1,94 @@
-# METCS777 Term Project - Team 13 ColliderScope 
+# MET CS 777 Term Project - Team 13: ColliderScope
 
-Advanced machine learning models for Higgs boson detection using PySpark on AWS EMR.
+**Advanced Machine Learning Models for Higgs Boson Detection using PySpark on AWS EMR**
 
 ## Team Members
+* **Sujan Gowda**
+* **Vignesh Swaminathan**
 
-- **Sujan Gowda**
-- **Vignesh Swaminathan**
+---
 
-## Project Overview
+## 1. Project Overview
+This project implements two parallel PySpark machine learning pipelines to classify Higgs boson signal events versus background noise. The solution leverages AWS EMR for distributed processing, utilizing physics-inspired feature engineering and advanced ensemble techniques to optimize signal detection.
 
-This project implements two different PySpark machine learning pipelines for classifying Higgs boson signal vs background events using physics-inspired feature engineering and advanced ensemble techniques.
+The project is divided into two modeling approaches:
+* **Approaches by Sujan Gowda:** Neural Network, GBT with Physics-Informed Loss, GBT with Bayesian Optimization.
+* **Approaches by Vignesh Swaminathan:** GBT Baseline, Random Forest Baseline, Stacking Ensemble.
 
-### Data
-- **Source**: sample_dataset.csv (11M rows available, models use 500k sample)
-- **Location**: `s3://colliderscope/dataset/sample_dataset.csv`
-- **Schema**: 29 columns (1 label + 28 features)
-- **Preprocessing**: Physics feature engineering, missing value handling, feature scaling
+---
 
-#### Sujan Gowda Models
-1. **Neural Network**
-2. **GBT with Physics-Informed Loss**
-3. **GBT with Bayesian Optimization**
+## 2. Dataset Description
+**Source:** The data is a subset of the standard HIGGS dataset (originally from the UCI Machine Learning Repository), generated via Monte Carlo simulations of particle collisions at CERN's ATLAS experiment. Dataset can be found here: https://opendata.cern.ch/search?q=&f=type%3ADataset&l=list&order=desc&p=1&s=10&sort=mostrecent
 
-#### Vignesh Swaminathan Models
-1. **GBT Baseline**
-2. **Random Forest Baseline**
-3. **Stacking Ensemble**
+### 2.1 Data Structure
+The dataset consists of **11 million rows** (observations) and **29 columns**. 
+* **Target Variable:** The first column is the class label (`1.0` for signal processes detecting the Higgs boson, `0.0` for background noise).
+* **Features:** The remaining 28 columns are numerical features derived from particle sensors.
 
-## Requirements
+### 2.2 Feature Breakdown
+The 28 features are divided into two distinct categories critical for the classification task:
 
-- pyspark==3.5.0
-- pandas==2.2.0
-- numpy==1.26.0
-- matplotlib==3.8.0
-- seaborn==0.13.0
+1.  **Low-Level Kinematic Features (First 21 features):** These represent raw measurements of particle momenta and energy.
+    * *Lepton pT, eta, phi*: Properties of the detected lepton.
+    * *Missing Energy magnitude & phi*: Imbalance in energy indicating unseen particles (neutrinos).
+    * *Jets 1-4 (pT, eta, phi, b-tag)*: Properties of up to four jets (sprays of hadrons) produced in the collision.
 
-## Environment Setup
+2.  **High-Level Derived Features (Last 7 features):** These are complex, non-linear functions of the low-level features, designed by physicists to discriminate between Higgs decay signatures and background.
+    * *m_jj, m_jjj, m_lv, m_jlv, m_bb, m_wbb, m_wwbb*: Various invariant masses calculated from combinations of the jets and leptons. These are theoretically highly predictive of the Higgs boson presence.
 
-1. **AWS Account** with EMR access
-2. **S3 Bucket** `s3://colliderscope/` with:
-   - Dataset: `s3://colliderscope/dataset/sample_dataset.csv`
-   - Results: `s3://colliderscope/results/week2_results_summary.csv`
-3. **Python Environment** with required packages
+### 2.3 Preprocessing & Storage
+* **S3 Location:** `s3://colliderscope/dataset/sample_dataset.csv` (Sample) / `s3://colliderscope/dataset/HIGGS.csv` (Full)
+* **Preprocessing Steps:** * Schema inference and type casting (DoubleType).
+    * Handling of missing values (though the native HIGGS dataset is dense).
+    * Standard scaling applied to kinematic features for Neural Network convergence.
+    * Vector assembly for Spark MLlib consumption.
 
-### EMR Cluster Setup (Cloud)
+---
 
-#### 1.1 Create EMR Cluster:
-- Create an AWS EMR Cluster
-- Name the cluster (Ex. colliderscope)
-- Select EMR version of 7.0.0 or latest
-- Select the applications "Hadoop", "Spark"
-- Cluster size should "m5.xlarge"
-- Core instances "2"
-- Specify the cluster logs path to the "log" folder in your "S3" bucket
-- Select the EC2 key pair "vockey", which is default
-- Select the default "EMR_DefaultRole" and "EMR_EC2_DefaultRole" for the "Service Role" and "EC2 Instance Profile"
-- Click "Create Cluster"
+## 3. Results Summary
+Results are computed using Area Under the ROC Curve (AUC) and Accuracy metrics. The output files track the performance of both baseline and optimized models.
 
-```
-##### Upload directly from S3 Bucket:
-- Go to the desired folder in the S3 bucket
-- Click on "Upload"
-- Click on "Add files"
-- Browse and select your file and/or data and click "Upload"
-- NOTE: Uploading time may vary depending upon the network speed
+* **Metric:** AUC (Area Under Curve) is the primary metric due to the slight class imbalance and the physics requirement to maximize signal efficiency.
+* **Output Location:** `s3://colliderscope/results/`
 
+---
 
-```
+## 4. Requirements & Environment
 
-## 1.2 How to Run the Code
-#### EMR Console Submission
+### Software Requirements
+* **PySpark:** 3.5.0
+* **Pandas:** 2.2.0 (for result aggregation)
+* **Matplotlib/Seaborn:** (for visualization in notebooks)
 
-2.1 Submit Job to EMR Cluster with following command:
-- Once the cluster is created and in waiting status, go to "Add Step" option.
-- In the "Add Step" do the following:
-  - Application Type: Spark Application
-  - Step name: colliderscope_step
-  - Application location: s3://colliderscope/code/collider_scope_code.py
-  - Spark-submit: Optional
-  - Arguments: Optional
+### AWS EMR Cluster Configuration
+To replicate the results, provision a cluster with the following specs:
 
-## Output Files
+1.  **Release:** emr-7.0.0 (Applications: Hadoop, Spark)
+2.  **Hardware:** * **Master:** 1x m5.xlarge
+    * **Core:** 2x m5.xlarge (Minimum for distributed processing)
+3.  **Logging:** Enabled to `s3://colliderscope/logs/`
+4.  **Roles:** Default `EMR_DefaultRole` and `EMR_EC2_DefaultRole`
 
-Results are saved to `s3://colliderscope/results/`
+---
+
+## 5. Execution Instructions
+
+### Step 1: Upload Code & Data
+Ensure the dataset and the python script (`collider_scope_code.py`) are uploaded to your S3 bucket:
+* `s3://colliderscope/dataset/`
+* `s3://colliderscope/code/`
+
+### Step 2: Submit Spark Job via EMR Console
+1.  Navigate to the **EMR Cluster** console.
+2.  Select the running cluster and click **Steps** > **Add Step**.
+3.  Configure the step:
+    * **Type:** Spark application
+    * **Name:** `ColliderScope_Full_Run`
+    * **Deploy Mode:** Cluster
+    * **Application Location:** `s3://colliderscope/code/collider_scope_code.py`
+4.  Click **Add** to begin the pipeline.
+
+### Step 3: Retrieve Results
+Once the step status is **Completed**, download the results summary:
+```bash
+aws s3 cp s3://colliderscope/results/week2_results_summary.csv ./local_results/
