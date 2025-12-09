@@ -46,10 +46,31 @@ The 28 features are divided into two distinct categories critical for the classi
 ---
 
 ## 3. Results Summary
-Results are computed using Area Under the ROC Curve (AUC) and Accuracy metrics. The output files track the performance of both baseline and optimized models.
+We evaluated six different models using **Area Under the ROC Curve (AUC)** as our primary metric. AUC is the standard performance measure in High Energy Physics (HEP) because it is robust against class imbalance and independent of the decision threshold.
 
-* **Metric:** AUC (Area Under Curve) is the primary metric due to the slight class imbalance and the physics requirement to maximize signal efficiency.
-* **Output Location:** `s3://colliderscope/results/`
+### 3.1 Model Performance Comparison
+The table below summarizes the AUC scores achieved by each model on the test set.
+
+| Rank | Model Name | Developed By | AUC Score |
+| :--- | :--- | :--- | :--- |
+| 1 | Stacking Ensemble | Vignesh | 0.8300 |
+| 2 | Neural Network | Sujan | 0.8279 |
+| 3 | GBT (Bayesian Opt) | Sujan | 0.8155 |
+| 4 | Random Forest | Vignesh | 0.8083 |
+| 5 | GBT (Physics Loss) | Sujan | 0.7945 |
+| 6 | GBT Baseline | Vignesh | 0.7893 |
+
+### 3.2 Visualizations
+The pipeline generates the following plots in `s3://colliderscope/results/` to visualize these metrics:
+* **`week2_all_models_roc.png`**: ROC Curves overlaying all 6 models. The Stacking Ensemble (Red line) and Neural Network (Purple line) show the strongest convex curves, indicating superior true-positive rates at low false-positive thresholds.
+* **`week2_auc_comparison.png`**: A bar chart ranking models by AUC score, highlighting the ~4% performance gap between the Baseline GBT and the Stacking Ensemble.
+* **`week2_feature_importance.png`**: Identifies that derived mass features (like `m_bb` and `m_wwbb`) are the dominant predictors, confirming the value of physics-informed feature engineering.
+
+### 3.3 Performance Analysis
+* **Ensemble Dominance:** The **Stacking Ensemble** achieved the highest accuracy (**0.8300**), confirming that combining diverse weak learners (Random Forest, GBT, Logistic Regression) effectively reduces variance and generalizes better than any single model.
+* **Optimization Impact:** The **GBT with Bayesian Optimization** (**0.8155**) significantly outperformed the **GBT Baseline** (**0.7893**), yielding a **~2.6% improvement**. This demonstrates that hyperparameter tuning (maxDepth, stepSize) is critical for tree-based models on this dataset.
+* **Deep Learning Competitiveness:** The **Neural Network** (**0.8279**) was the top-performing single model, nearly matching the ensemble. This suggests that the dense, non-linear relationships in the kinematic data are well-captured by multi-layer perceptrons.
+* **Physics-Informed Loss:** While the **Physics-Loss GBT** (**0.7945**) beat the baseline, it trailed the Bayesian Optimized model. This indicates that while weighting signal events helps, structural hyperparameter tuning provides a larger immediate gain in predictive power.
 
 ---
 
@@ -92,3 +113,8 @@ Ensure the dataset and the python script (`collider_scope_code.py`) are uploaded
 Once the step status is **Completed**, download the results summary:
 ```bash
 aws s3 cp s3://colliderscope/results/week2_results_summary.csv ./local_results/
+
+### Visualizations (Plots)
+* **`week2_all_models_roc.png`**: ROC Curves overlaying all 6 models to compare performance visually.
+* **`week2_auc_comparison.png`**: A bar chart ranking models by AUC score.
+* **`week2_feature_importance.png`**: Top 15 features driving the Gradient Boosted Tree (GBT) baseline predictions.
