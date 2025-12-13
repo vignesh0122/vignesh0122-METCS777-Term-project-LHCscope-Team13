@@ -53,11 +53,11 @@ The table below summarizes the AUC scores achieved by each model on the test set
 
 | Rank | Model Name | Developed By | AUC Score |
 | :--- | :--- | :--- | :--- |
-| 1 | Stacking Ensemble | Vignesh | 0.8300 |
-| 2 | Neural Network | Sujan | 0.8279 |
-| 3 | GBT (Bayesian Opt) | Sujan | 0.8155 |
-| 4 | Random Forest | Vignesh | 0.8083 |
-| 5 | GBT (Physics Loss) | Sujan | 0.7945 |
+| 1 | Stacking Ensemble | Vignesh | 0.8435 |
+| 2 | Neural Network | Sujan | 0.8393 |
+| 3 | GBT (Bayesian Opt) | Sujan | 0.8201 |
+| 4 | Random Forest | Vignesh | 0.8210 |
+| 5 | GBT (Physics Loss) | Sujan | 0.7972 |
 | 6 | GBT Baseline | Vignesh | 0.7893 |
 
 ### 3.2 Visualizations
