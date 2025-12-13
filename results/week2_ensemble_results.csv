@@ -1,0 +1,7 @@
+Model,AUC
+Stacking Ensemble,0.843488
+Neural Network,0.839303
+Random Forest,0.820952
+GBT Bayesian Opt,0.820097
+GBT Physics Loss,0.797225
+GBT Baseline,0.612864
